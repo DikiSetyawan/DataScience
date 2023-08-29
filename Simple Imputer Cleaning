@@ -1,0 +1,35 @@
+#Importing Lib
+#diki
+import pandas as pd
+import numpy as np
+pd.plotting.register_matplotlib_converters()
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+print("Setup Complete")
+
+#load and examine data
+#Diki
+smartwatches = pd.read_csv("/kaggle/input/fitness-trackers-products-ecommerce/smartwatches.csv")
+smartwatches.head()
+
+#prepro
+#Diki
+from sklearn.impute import SimpleImputer
+
+si_mean = SimpleImputer(strategy="mean", missing_values=np.nan)
+si_mode = SimpleImputer(strategy="most_frequent", missing_values=np.nan)
+si_median = SimpleImputer(strategy="median", missing_values=np.nan)
+
+mean_cols = ["Current Price", "Original Price", "Discount Percentage", "Rating"]
+smartwatches[mean_cols] = si_mean.fit_transform(smartwatches[mean_cols])
+
+mode_cols = ["Dial Shape","Strap Color","Model Name","Strap Material", 
+             "Touchscreen", "Battery Life (Days)", "Bluetooth", "Display Size", "Weight"]
+smartwatches[mode_cols] = si_mode.fit_transform(smartwatches[mode_cols])
+
+smartwatches[["Number OF Ratings"]] = si_median.fit_transform(smartwatches[["Number OF Ratings"]])
+
+smartwatches.head()
+
+smartwaches.to_csv('smartw.csv',index=False)
