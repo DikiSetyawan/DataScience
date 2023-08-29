@@ -1,0 +1,59 @@
+import pandas as pd
+
+Salary = pd.read_csv ('/kaggle/input/dssalaries/ds_salaries.csv')
+Salary.columns
+Salary.describe()
+
+#Encoding string column for better reading
+categorical_columns = ['job_title', 'experience_level', 'company_location', 'company_size']
+Salary_encoded = pd.get_dummies(Salary, columns=categorical_columns)
+Salary_encoded.columns
+
+
+#Building Function and model 
+X = Salary_encoded[['job_title_AI Scientist','job_title_Data Scientist',
+                    'job_title_Machine Learning Scientist','job_title_Big Data Engineer',
+                    'job_title_Machine Learning Engineer','job_title_Data Analyst',
+                    'job_title_Lead Data Engineer',
+                    'job_title_Lead Data Analyst',
+                    'experience_level_MI','experience_level_SE','experience_level_EN',
+          'company_size_L','company_size_M','company_size_S','work_year']]
+y = Salary_encoded.salary_in_usd
+
+from sklearn.tree import DecisionTreeRegressor
+model = DecisionTreeRegressor(random_state=1)
+model.fit(X, y)
+print (X.head())
+print ( model.predict(X.head()))
+
+#Evaluation
+from sklearn.metrics import mean_absolute_error
+
+prediksi = model.predict (X)
+mean_absolute_error(y, prediksi)
+
+#Validation
+from sklearn.model_selection import train_test_split
+
+train_X, val_X, train_y, val_y = train_test_split(X, y, random_state = 0)
+model = DecisionTreeRegressor()
+model.fit(train_X, train_y)
+validasi = model.predict(val_X)
+print(mean_absolute_error(val_y, validasi))
+
+#using randomforest algorthm
+from sklearn.ensemble import RandomForestRegressor
+
+model = RandomForestRegressor(random_state=1)
+model.fit(train_X, train_y)
+randomforestpred = model.predict(val_X)
+print(mean_absolute_error(val_y, randomforestpred))
+
+#RF evaluation
+from sklearn.metrics import r2_score
+
+r2 = r2_score (y,prediksi)
+print (r2)
+
+ar2 = 1-(1-r2)*(len(y)-1)/(len(y)- X.shape [1]-1)
+print (ar2)
