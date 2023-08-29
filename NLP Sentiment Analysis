@@ -1,0 +1,74 @@
+#DikiSetyawan
+
+#Importing Library
+import pandas as pd
+import pickle
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+
+
+#Building or importing dataset
+kalimat = {
+    'Text': [
+        'Your Sentences dataframe'
+    ],
+    'Label': [
+        'positif',
+        'positif',
+        'positif',
+        'positif',
+        'positif',
+        'negatif',
+        'negatif',
+        'negatif',
+        'negatif',
+        'negatif'
+
+    ]
+}
+
+df = pd.DataFrame(kalimat, columns=['Text', 'Label'])
+
+
+#Defining Function for features 
+def klasifikasi(df):
+    X = df['Text']
+    y = df['Label']
+
+    vectorizer = CountVectorizer()
+    X_features = vectorizer.fit_transform(X)
+
+
+    classifier = MultinomialNB()
+    classifier.fit(X_features, y)
+
+
+    with open('naive_bayes_classifier.pickle', 'wb') as f:
+        pickle.dump(classifier, f)
+    with open('count_vectorizer.pickle', 'wb') as f:
+        pickle.dump(vectorizer, f)
+
+klasifikasi(df)
+print (df)
+
+#clasification
+def klasifikasi2(text):
+
+
+    with open('naive_bayes_classifier.pickle', 'rb') as f:
+        classifier = pickle.load(f)
+    with open('count_vectorizer.pickle', 'rb') as f:
+        vectorizer = pickle.load(f)
+
+    X_feature = vectorizer.transform([text])
+
+    result = classifier.predict(X_feature)
+    return result[0]
+
+df['prediksi'] = df['Text'].apply(klasifikasi2)
+print (df)
+
+#Putting up new word for prediction
+kalimat_baru = 'capek'
+prediksi = klasifikasi2(kalimat_baru)
+print (prediksi)
