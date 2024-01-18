@@ -1,0 +1,59 @@
+import cv2
+import easyocr
+import json
+
+cv2.ocl.setUseOpenCL(False)
+
+def detect_text(image_path, language='en', output_json='output.json', output_txt='output.txt'):
+    # Load the image using OpenCV
+    image = cv2.imread(image_path)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Initialize the OCR reader with the specified language
+    reader = easyocr.Reader([language])
+
+    # Use EasyOCR to detect textA in the image
+    results = reader.readtext(gray)
+
+    # Create a list to store text results
+    text_results = []
+
+    # Process the results
+    for (_, text, prob), _ in zip(results, range(len(results))):
+        text_results.append({'text': text, 'confidence': prob})
+
+    # Export results to JSON
+    with open(output_json, 'w') as json_file:
+        json.dump(text_results, json_file, indent=2)
+
+    # Export results to TXT
+    with open(output_txt, 'w') as txt_file:
+        for result in text_results:
+            txt_file.write(f"{result['text']} (Confidence: {result['confidence']:.2f})\n")
+
+    # Display the original image with bounding boxes around the detected text
+    for (bbox, _, _), _ in zip(results, range(len(results))):
+        (top_left, _, bottom_right, _) = bbox
+        top_left = tuple(map(int, top_left))
+        bottom_right = tuple(map(int, bottom_right))
+
+        # Draw the bounding box around the text
+        cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
+
+
+if __name__ == "__main__":
+    # Provide the path to your image file
+    image_path = "/home/sat/project/OCR/buruh.jpg"
+
+    # Specify the language for OCR (e.g., 'english', 'chinese', etc.)
+    ocr_language = 'en'
+
+    # Specify the output file paths
+    output_json = '/home/sat/project/OCR/output.json'
+    output_txt = '/home/sat/project/OCR/output.txt'
+
+    detect_text(image_path, language=ocr_language, output_json=output_json, output_txt=output_txt)
+
+    print(f"Results exported to {output_json} and {output_txt}.")
